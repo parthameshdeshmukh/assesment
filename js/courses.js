@@ -89,21 +89,33 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial Load Courses
   loadCourses();
 
-  // Search Listener
+  // Search Listener with Debounced Analytics Tracking
+  let searchDebounceTimeout;
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       searchQuery = e.target.value.toLowerCase().trim();
       filterAndRenderCourses();
+
+      clearTimeout(searchDebounceTimeout);
+      searchDebounceTimeout = setTimeout(() => {
+        if (searchQuery.length > 1 && typeof trackAnalyticsEvent === 'function') {
+          trackAnalyticsEvent('search_courses', { search_term: searchQuery });
+        }
+      }, 500);
     });
   }
 
-  // Category Filter Listener
+  // Category Filter Listener with Analytics Tracking
   filterPills.forEach(pill => {
     pill.addEventListener('click', () => {
       filterPills.forEach(p => p.classList.remove('active'));
       pill.classList.add('active');
       currentCategory = pill.getAttribute('data-category');
       filterAndRenderCourses();
+
+      if (typeof trackAnalyticsEvent === 'function') {
+        trackAnalyticsEvent('select_category_filter', { category: currentCategory });
+      }
     });
   });
 
