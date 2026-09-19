@@ -53,20 +53,24 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // 4. Mobile Gyroscope / Touch Drag Support
+    // 4. Mobile Touch Drag Support
     card.addEventListener('touchmove', (e) => {
       if (e.touches.length > 0) {
         const touch = e.touches[0];
         const rect = card.getBoundingClientRect();
-        const mouseX = (touch.clientX - rect.left - rect.width / 2) / (rect.width / 2);
-        const mouseY = (touch.clientY - rect.top - rect.height / 2) / (rect.height / 2);
+        const mouseX = Math.max(-1, Math.min(1, (touch.clientX - rect.left - rect.width / 2) / (rect.width / 2)));
+        const mouseY = Math.max(-1, Math.min(1, (touch.clientY - rect.top - rect.height / 2) / (rect.height / 2)));
 
-        card.style.transform = `rotateX(${-mouseY * 12}deg) rotateY(${mouseX * 14}deg)`;
+        card.style.transform = `rotateX(${-mouseY * 8}deg) rotateY(${mouseX * 10}deg) scale3d(1.02, 1.02, 1.02)`;
       }
-    });
+    }, { passive: true });
 
-    card.addEventListener('touchend', () => {
-      card.style.transform = 'rotateX(0deg) rotateY(0deg)';
-    });
+    const resetTouch = () => {
+      card.style.transition = 'transform 0.4s ease-out';
+      card.style.transform = 'rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+    };
+
+    card.addEventListener('touchend', resetTouch);
+    card.addEventListener('touchcancel', resetTouch);
   });
 });

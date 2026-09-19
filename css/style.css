@@ -52,6 +52,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
@@ -70,7 +71,7 @@ body {
   position: relative;
 }
 
-/* Cursor Light Glow Effect */
+/* Cursor Light Glow Effect (Desktop Only) */
 .cursor-light-glow {
   position: fixed;
   top: 0;
@@ -84,6 +85,12 @@ body {
   transform: translate(-50%, -50%);
   transition: transform 0.15s ease-out, opacity 0.3s ease;
   opacity: 0.8;
+}
+
+@media (hover: none) or (pointer: coarse) {
+  .cursor-light-glow {
+    display: none !important;
+  }
 }
 
 a {
@@ -101,6 +108,11 @@ button, input {
 button {
   cursor: pointer;
   user-select: none;
+  touch-action: manipulation;
+}
+
+button:active, .btn-lime:active, .btn-dark:active, .filter-pill:active, .social-icon-btn:active {
+  transform: scale(0.97) !important;
 }
 
 img, svg {
@@ -114,6 +126,12 @@ img, svg {
   max-width: 1240px;
   margin: 0 auto;
   padding: 0 24px;
+}
+
+@media screen and (max-width: 576px) {
+  .container {
+    padding: 0 16px;
+  }
 }
 
 /* Scroll Animation Utilities */
@@ -131,3 +149,4 @@ img, svg {
 .reveal-delay-1 { transition-delay: 0.1s; }
 .reveal-delay-2 { transition-delay: 0.2s; }
 .reveal-delay-3 { transition-delay: 0.3s; }
+

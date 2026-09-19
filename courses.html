@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ClassIQ - Courses Dashboard</title>
   <meta name="description" content="Enroll in your favorite courses. Master Web Development, Data Science, App Development, and UI/UX design with ClassIQ.">
+  <script>
+    // Redirect to SPA view without page reload delay
+    window.location.replace('index.html#courses');
+  </script>
   
   <!-- CSS Stylesheets -->
   <link rel="stylesheet" href="css/style.css">
@@ -217,16 +221,24 @@
 
         <ul class="nav-links">
           <li><a href="courses.html" class="nav-link active">Dashboard</a></li>
+
+          <li class="mobile-nav-actions">
+            <a href="login.html" class="btn-dark" style="text-align: center;">Login</a>
+            <a href="signup.html" class="btn-lime" style="width: 100%; font-size: 0.95rem; padding: 12px; text-align: center;">SignUp</a>
+          </li>
         </ul>
       </div>
 
       <div class="nav-actions">
-        <button class="btn-dark trigger-login">Login</button>
-        <button class="btn-dark trigger-signup">SignUp</button>
+        <a href="login.html" class="btn-dark">Login</a>
+        <a href="signup.html" class="btn-dark">SignUp</a>
         <button class="hamburger-menu" aria-label="Toggle Navigation">☰</button>
       </div>
     </div>
   </header>
+
+  <!-- Mobile Menu Backdrop Overlay -->
+  <div class="nav-overlay" id="nav-overlay"></div>
 
   <main class="container">
     <!-- ================= DASHBOARD HERO BANNER ================= -->

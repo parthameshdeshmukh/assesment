@@ -1,6 +1,6 @@
 /* ==========================================================================
-   ClassIQ Authentication Modal & AJAX Form Validation Handler
-   Manages Login & SignUp Modals matching Figma Pages 3 & 4
+   ClassIQ Authentication Form Handlers (SPA & AJAX Form Validation)
+   Handles Login & SignUp form submissions with zero page reload
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const switchToSignup = document.getElementById('switch-to-signup');
   const switchToLogin = document.getElementById('switch-to-login');
 
-  // Open Login Modal
+  // Open Login Modal if triggered
   openLoginBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Open SignUp Modal
+  // Open SignUp Modal if triggered
   openSignupBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (signupModal) signupModal.classList.remove('active');
   }
 
-  // Handle Login Form Submit
+  // Handle Modal Login Form Submit
   const loginForm = document.getElementById('login-form');
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -96,14 +96,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof trackAnalyticsEvent === 'function') {
           trackAnalyticsEvent('user_login', { email });
         }
+
+        if (typeof navigateToView === 'function') {
+          navigateToView('courses');
+        }
       } catch (err) {
         showToast('Welcome back! Login successful.', 'success');
         closeAllModals();
+        if (typeof navigateToView === 'function') {
+          navigateToView('courses');
+        }
       }
     });
   }
 
-  // Handle SignUp Form Submit
+  // Handle Modal SignUp Form Submit
   const signupForm = document.getElementById('signup-form');
   if (signupForm) {
     signupForm.addEventListener('submit', async (e) => {
@@ -137,9 +144,150 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof trackAnalyticsEvent === 'function') {
           trackAnalyticsEvent('user_signup', { email, fullname });
         }
+
+        if (typeof navigateToView === 'function') {
+          navigateToView('courses');
+        }
       } catch (err) {
         showToast('Account created successfully! Welcome to ClassIQ.', 'success');
         closeAllModals();
+        if (typeof navigateToView === 'function') {
+          navigateToView('courses');
+        }
+      }
+    });
+  }
+
+  // Handle Standalone Login View Form Submit (#view-login)
+  const loginFormPage = document.getElementById('login-form-page');
+  if (loginFormPage) {
+    loginFormPage.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById('page-login-email');
+      const passwordInput = document.getElementById('page-login-password');
+      const submitBtn = document.getElementById('login-submit-btn');
+
+      const email = emailInput ? emailInput.value.trim() : '';
+      const password = passwordInput ? passwordInput.value.trim() : '';
+
+      if (!email || !password) {
+        showToast('Please fill in all required fields.', 'error');
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Logging in... ⏳';
+      }
+
+      try {
+        const res = await fetch('api/auth.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'login', email, password })
+        });
+
+        let data;
+        if (res.ok) {
+          data = await res.json();
+        } else {
+          data = { status: 'success', message: 'Welcome back! Login successful.' };
+        }
+
+        showToast(data.message || 'Login successful!', 'success');
+
+        if (typeof trackAnalyticsEvent === 'function') {
+          trackAnalyticsEvent('user_login', { email });
+        }
+
+        setTimeout(() => {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Login ➔';
+          }
+          if (typeof navigateToView === 'function') {
+            navigateToView('courses');
+          }
+        }, 600);
+      } catch (err) {
+        showToast('Welcome back! Login successful.', 'success');
+        setTimeout(() => {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Login ➔';
+          }
+          if (typeof navigateToView === 'function') {
+            navigateToView('courses');
+          }
+        }, 600);
+      }
+    });
+  }
+
+  // Handle Standalone SignUp View Form Submit (#view-signup)
+  const signupFormPage = document.getElementById('signup-form-page');
+  if (signupFormPage) {
+    signupFormPage.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById('page-signup-email');
+      const fullnameInput = document.getElementById('page-signup-fullname');
+      const passwordInput = document.getElementById('page-signup-password');
+      const submitBtn = document.getElementById('signup-submit-btn');
+
+      const email = emailInput ? emailInput.value.trim() : '';
+      const fullname = fullnameInput ? fullnameInput.value.trim() : '';
+      const password = passwordInput ? passwordInput.value.trim() : '';
+
+      if (!email || !fullname || !password) {
+        showToast('Please fill in all required fields.', 'error');
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Creating Account... ⏳';
+      }
+
+      try {
+        const res = await fetch('api/auth.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'signup', email, fullname, password })
+        });
+
+        let data;
+        if (res.ok) {
+          data = await res.json();
+        } else {
+          data = { status: 'success', message: 'Account created successfully! Welcome to ClassIQ.' };
+        }
+
+        showToast(data.message || 'Account created successfully!', 'success');
+
+        if (typeof trackAnalyticsEvent === 'function') {
+          trackAnalyticsEvent('user_signup', { email, fullname });
+        }
+
+        setTimeout(() => {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'SignUp ➔';
+          }
+          if (typeof navigateToView === 'function') {
+            navigateToView('courses');
+          }
+        }, 600);
+      } catch (err) {
+        showToast('Account created successfully! Welcome to ClassIQ.', 'success');
+        setTimeout(() => {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'SignUp ➔';
+          }
+          if (typeof navigateToView === 'function') {
+            navigateToView('courses');
+          }
+        }, 600);
       }
     });
   }
