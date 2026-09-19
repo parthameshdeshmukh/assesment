@@ -1,1 +1,15 @@
+# Ignore PDF files & large design assets
 *.pdf
+Figma Design.pdf
+
+# Ignore Python script & scratch files
+remove_bg.py
+__pycache__/
+*.pyc
+
+# Ignore OS & IDE settings
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log

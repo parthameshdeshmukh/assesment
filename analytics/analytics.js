@@ -5,7 +5,7 @@
    ========================================================================== */
 
 // Configure Measurement ID (replace 'G-CLASS1Q2024' with your live GA4 ID when publishing)
-const GA_MEASUREMENT_ID = window.GA_MEASUREMENT_ID || 'G-CLASS1Q2024';
+const GA_MEASUREMENT_ID = window.GA_MEASUREMENT_ID || 'G-9WNJ04H4LM';
 
 // Enable Developer Console Logging
 const GA_DEBUG_MODE = true;
@@ -20,7 +20,7 @@ const GA_DEBUG_MODE = true;
   }
 
   window.dataLayer = window.dataLayer || [];
-  function gtag(){ dataLayer.push(arguments); }
+  function gtag() { dataLayer.push(arguments); }
   window.gtag = window.gtag || gtag;
 
   window.gtag('js', new Date());

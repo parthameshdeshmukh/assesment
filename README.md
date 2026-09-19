@@ -25,7 +25,7 @@ A pixel-perfect, highly responsive, performance-optimized EdTech web application
 - **Dual Mode Reliability**: Features automatic fallback mock data so the application runs seamlessly **both** as static HTML files (`file:///` / static server) **and** on a live PHP backend (`php -S localhost:8000`).
 
 ### 4. 📊 Google Analytics 4 (GA4) & Tag Manager (GTM)
-- Includes GA4 Global Measurement script snippet (`js/analytics.js`).
+- Includes GA4 Global Measurement script snippet (`analytics/analytics.js`).
 - Integrated event triggers tracking:
   - `user_login` & `user_signup`
   - `course_enroll`
@@ -40,6 +40,9 @@ c:\Users\prath\OneDrive\Desktop\assesment\
 ├── index.html              # Landing Page (Figma Page 2 with 3D Interactive Hero)
 ├── courses.html            # Dashboard / Courses Page (Figma Page 5)
 ├── README.md               # Detailed Setup & Features Documentation
+├── analytics/              # Dedicated Analytics Module & Documentation
+│   ├── analytics.js        # Google Analytics 4 & GTM Event Tracker Engine
+│   └── README.md           # Analytics Module Documentation & Event List
 ├── api/                    # PHP REST API Endpoints
 │   ├── config.php          # API CORS headers & JSON helper functions
 │   ├── courses.php         # GET /api/courses.php (JSON course list)
@@ -51,7 +54,6 @@ c:\Users\prath\OneDrive\Desktop\assesment\
 │   └── responsive.css      # Mobile (<576px), Tablet (768px-1024px) & Desktop Breakpoints
 ├── js/
 │   ├── hero-3d.js          # Interactive 3D Avatar Mouse Tracking Engine
-│   ├── analytics.js        # Google Analytics 4 & GTM Event Tracker
 │   ├── main.js             # Sticky Nav, Mobile Menu Drawer & Toast System
 │   ├── auth.js             # SignUp & Login Modal Controls & Form AJAX Handler
 │   └── courses.js          # AJAX Course Fetching, Search & Category Filters
