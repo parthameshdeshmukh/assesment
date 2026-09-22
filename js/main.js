@@ -1,80 +1,10 @@
 /* ==========================================================================
-   ClassIQ Creative Motion Engine & Single-Page Router (SPA)
-   Scroll Reveal Animations, Ambient Cursor Glow, Mobile Menu, SPA Router, Toast Alerts
+   ClassIQ Core UI & Creative Motion Engine
+   Scroll Reveal Animations, Ambient Cursor Glow, Mobile Drawer Menu, Toast Alerts
    ========================================================================== */
 
-/**
- * SPA View Router - Switches active view container without page reloads
- * @param {string} targetViewId - 'home' | 'courses' | 'login' | 'signup'
- */
-function navigateToView(targetViewId) {
-  if (!targetViewId) targetViewId = 'home';
-  targetViewId = targetViewId.replace('#', '').toLowerCase();
-
-  const validViews = ['home', 'courses', 'login', 'signup'];
-  if (!validViews.includes(targetViewId)) {
-    targetViewId = 'home';
-  }
-
-  const allViews = document.querySelectorAll('.page-view');
-  allViews.forEach(view => {
-    view.classList.remove('active-view');
-    view.style.display = 'none';
-  });
-
-  const targetViewEl = document.getElementById(`view-${targetViewId}`);
-  if (targetViewEl) {
-    targetViewEl.style.display = 'block';
-    // Force reflow for animation restart
-    void targetViewEl.offsetWidth;
-    targetViewEl.classList.add('active-view');
-  }
-
-  // Update Navbar Active state
-  document.querySelectorAll('.nav-link-item').forEach(link => {
-    const linkTarget = link.getAttribute('data-view-target') || link.getAttribute('href');
-    if (linkTarget && linkTarget.replace('#', '').toLowerCase() === targetViewId) {
-      link.classList.add('active');
-    } else {
-      link.classList.remove('active');
-    }
-  });
-
-  // Re-trigger reveal animations for elements inside the target view
-  if (targetViewEl) {
-    const newlyVisibleReveals = targetViewEl.querySelectorAll('.reveal-on-scroll');
-    newlyVisibleReveals.forEach(el => el.classList.add('is-visible'));
-  }
-
-  // Update URL Hash without trigger loop
-  if (window.location.hash !== `#${targetViewId}`) {
-    history.pushState(null, null, `#${targetViewId}`);
-  }
-
-  // Close Mobile Navigation Drawer
-  const navLinks = document.querySelector('.nav-links');
-  const navOverlay = document.getElementById('nav-overlay');
-  const hamburgerBtn = document.querySelector('.hamburger-menu');
-  if (navLinks) navLinks.classList.remove('active');
-  if (navOverlay) navOverlay.classList.remove('active');
-  if (hamburgerBtn) {
-    hamburgerBtn.classList.remove('active');
-    hamburgerBtn.innerHTML = '☰';
-  }
-  document.body.style.overflow = '';
-
-  // Scroll to top cleanly
-  window.scrollTo({ top: 0, behavior: 'instant' });
-
-  // Track Analytics View Event
-  if (typeof trackAnalyticsEvent === 'function') {
-    trackAnalyticsEvent('view_page', { page_view: targetViewId });
-  }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-
-  // 1. Create Ambient Cursor Glow Follower
+  // Cursor glow follower
   const cursorGlow = document.createElement('div');
   cursorGlow.className = 'cursor-light-glow';
   document.body.appendChild(cursorGlow);
@@ -84,13 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
     cursorGlow.style.top = `${e.clientY}px`;
   });
 
-  // 2. Intersection Observer for Scroll Reveal Animations
+  // Scroll reveal animations
   const revealElements = document.querySelectorAll('.reveal-on-scroll');
-  const observerOptions = {
-    threshold: 0.15,
-    rootMargin: '0px 0px -50px 0px'
-  };
-
   const revealObserver = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -98,86 +23,48 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.unobserve(entry.target);
       }
     });
-  }, observerOptions);
+  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
 
   revealElements.forEach(el => revealObserver.observe(el));
 
-  // 3. Mobile Menu Drawer Toggle & Overlay Handler
+  // Mobile menu drawer
   const hamburgerBtn = document.querySelector('.hamburger-menu');
   const navLinks = document.querySelector('.nav-links');
   const navOverlay = document.getElementById('nav-overlay');
 
-  function openMobileMenu() {
-    if (navLinks) navLinks.classList.add('active');
-    if (navOverlay) navOverlay.classList.add('active');
-    if (hamburgerBtn) {
-      hamburgerBtn.classList.add('active');
-      hamburgerBtn.innerHTML = '✕';
-      hamburgerBtn.setAttribute('aria-expanded', 'true');
-    }
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeMobileMenu() {
-    if (navLinks) navLinks.classList.remove('active');
-    if (navOverlay) navOverlay.classList.remove('active');
-    if (hamburgerBtn) {
-      hamburgerBtn.classList.remove('active');
-      hamburgerBtn.innerHTML = '☰';
-      hamburgerBtn.setAttribute('aria-expanded', 'false');
-    }
-    document.body.style.overflow = '';
-  }
-
   if (hamburgerBtn && navLinks) {
+    const toggleMenu = (open) => {
+      navLinks.classList.toggle('active', open);
+      if (navOverlay) navOverlay.classList.toggle('active', open);
+      hamburgerBtn.classList.toggle('active', open);
+      hamburgerBtn.innerHTML = open ? '✕' : '☰';
+      hamburgerBtn.setAttribute('aria-expanded', open);
+      document.body.style.overflow = open ? 'hidden' : '';
+    };
+
     hamburgerBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const isOpen = navLinks.classList.contains('active');
-      if (isOpen) {
-        closeMobileMenu();
-      } else {
-        openMobileMenu();
-      }
+      toggleMenu(!navLinks.classList.contains('active'));
     });
 
     if (navOverlay) {
-      navOverlay.addEventListener('click', closeMobileMenu);
+      navOverlay.addEventListener('click', () => toggleMenu(false));
     }
   }
 
-  // 4. SPA Navigation Link Interceptor - 100% Zero-Reload View Switching
-  document.body.addEventListener('click', (e) => {
-    const targetLink = e.target.closest('[data-view-target], a[href^="#"]');
-    if (targetLink) {
-      const targetView = targetLink.getAttribute('data-view-target') || targetLink.getAttribute('href');
-      if (targetView && (targetView.startsWith('#') || !targetView.includes('.'))) {
-        e.preventDefault();
-        const viewName = targetView.replace('#', '');
-        
-        // Handle filter shortcut buttons (e.g. View Courses -> Web Dev)
-        const categoryShortcut = targetLink.getAttribute('data-category');
-        navigateToView(viewName);
-
-        if (categoryShortcut && typeof window.applyCategoryFilter === 'function') {
-          window.applyCategoryFilter(categoryShortcut);
-        }
+  // Active nav link indicator
+  const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.nav-link, .nav-link-item').forEach(link => {
+    const href = link.getAttribute('href');
+    if (href) {
+      const linkPath = href.split('#')[0].split('?')[0];
+      if (linkPath === currentPath || (currentPath === '' && linkPath === 'index.html')) {
+        link.classList.add('active');
       }
     }
   });
 
-  // Handle Browser Back/Forward buttons via Hash Change
-  window.addEventListener('hashchange', () => {
-    const currentHash = window.location.hash.replace('#', '');
-    if (currentHash) {
-      navigateToView(currentHash);
-    }
-  });
-
-  // Initialize View from current Hash or default to 'home'
-  const initialHash = window.location.hash.replace('#', '') || 'home';
-  navigateToView(initialHash);
-
-  // 5. Newsletter Subscription Form Handler
+  // Newsletter form
   const newsletterForm = document.querySelector('.newsletter-form');
   if (newsletterForm) {
     newsletterForm.addEventListener('submit', async (e) => {
@@ -194,35 +81,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch('api/subscribe.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: email })
+          body: JSON.stringify({ email })
         });
-        
-        let result;
-        if (response.ok) {
-          result = await response.json();
-        } else {
-          result = { status: 'success', message: 'Thank you for subscribing to ClassIQ!' };
-        }
 
+        const result = response.ok ? await response.json() : { message: 'Thank you for subscribing!' };
         showToast(result.message || 'Subscribed successfully!', 'success');
         if (emailInput) emailInput.value = '';
 
         if (typeof trackAnalyticsEvent === 'function') {
-          trackAnalyticsEvent('newsletter_subscribe', { email: email });
+          trackAnalyticsEvent('newsletter_subscribe', { email });
         }
       } catch (err) {
-        showToast('Thank you for subscribing to ClassIQ!', 'success');
+        showToast('Thank you for subscribing!', 'success');
         if (emailInput) emailInput.value = '';
       }
     });
   }
 });
 
-/**
- * Toast Notification System
- * @param {string} message - Text message to present in toast
- * @param {string} type - 'success' | 'error' | 'info'
- */
 function showToast(message, type = 'success') {
   let container = document.querySelector('.toast-container');
   if (!container) {
@@ -233,10 +109,7 @@ function showToast(message, type = 'success') {
 
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  toast.innerHTML = `
-    <span>${type === 'success' ? '✓' : 'ℹ'}</span>
-    <div>${message}</div>
-  `;
+  toast.innerHTML = `<span>${type === 'success' ? '✓' : 'ℹ'}</span><div>${message}</div>`;
 
   container.appendChild(toast);
 

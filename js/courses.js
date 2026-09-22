@@ -1,8 +1,3 @@
-/* ==========================================================================
-   ClassIQ Courses & Student Dashboard Logic
-   AJAX course data retrieval, category filters, search input & enrollment logic
-   ========================================================================== */
-
 const MOCK_COURSES = [
   {
     id: 1,
@@ -86,10 +81,19 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentCategory = 'all';
   let searchQuery = '';
 
-  // Initial Load Courses
+  // Apply category from URL parameter if present
+  const urlParams = new URLSearchParams(window.location.search);
+  const categoryParam = urlParams.get('category');
+  if (categoryParam) {
+    currentCategory = categoryParam;
+    filterPills.forEach(pill => {
+      pill.classList.toggle('active', pill.getAttribute('data-category') === categoryParam);
+    });
+  }
+
   loadCourses();
 
-  // Search Listener with Debounced Analytics Tracking
+  // Search input with debounce
   let searchDebounceTimeout;
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
@@ -105,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Category Filter Listener with Analytics Tracking
+  // Category filter buttons
   filterPills.forEach(pill => {
     pill.addEventListener('click', () => {
       filterPills.forEach(p => p.classList.remove('active'));
@@ -139,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const courses = window.allCourses || MOCK_COURSES;
 
     const filtered = courses.filter(course => {
-      const matchesCat = (currentCategory === 'all' || course.category === currentCategory);
+      const matchesCat = currentCategory === 'all' || course.category === currentCategory;
       const matchesSearch = course.title.toLowerCase().includes(searchQuery) ||
                             course.description.toLowerCase().includes(searchQuery);
       return matchesCat && matchesSearch;
@@ -184,3 +188,4 @@ function enrollCourse(courseId, courseTitle) {
     trackAnalyticsEvent('course_enroll', { course_id: courseId, course_title: courseTitle });
   }
 }
+
